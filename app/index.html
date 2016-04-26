@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" ng-app="zogkillerApp">
 
 <head>
     <meta charset="utf-8">
@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head
          content must come *after* these tags -->
-    <title>Ristorante Con Fusion: Menu</title>
+    <title>Zog is Wack</title>
         <!-- Bootstrap -->
     <link href="../bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="../bower_components/bootstrap/dist/css/bootstrap-theme.min.css" rel="stylesheet">
@@ -24,13 +24,26 @@
 </head>
 
 <body>
+     
+    <!--
+    these single quotes here are very important - scott d. jan 3 2016
+    this will only work on a server when using Chrome, so you can use your command line to execute this with python:
+    "python -m SimpleHTTPServer 8000"
+    make sure you do it on the directory "C:\www\zogkiller"
+    then you can go to "localhost:8000/app/index.html" in chrome
+    -->
+   <!--  <div ui-view="header"></div> -->
+    <div ui-view="content"></div>
+    <!-- <div ui-view="footer"></div> -->
 
-    <div class="container">
-        <div class="row row-content">
-            <div class="col-xs-12">
-            </div>
-        </div>
-    </div>
+    <!-- build:js scripts/main.js -->
+    <script src="../bower_components/angular/angular.min.js"></script>
+    <script src="../bower_components/angular-ui-router/release/angular-ui-router.min.js"></script>
+    <script src="../bower_components/angular-resource/angular-resource.min.js"></script>
+    <!-- <script src="scripts/app.js"></script> -->
+    <!-- <script src="scripts/controllers.js"></script> -->
+    <!-- <script src="scripts/services.js"></script> -->
+    <!-- endbuild -->
 
 </body>
 
