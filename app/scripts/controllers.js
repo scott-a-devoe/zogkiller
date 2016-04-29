@@ -2,7 +2,7 @@
 
 angular.module('zogkillerApp')
 
-    .controller('IndexController', ['$scope', 'menuFactory', 'corporateFactory', function($scope, menuFactory, corporateFactory) {
+    .controller('IndexController', ['$scope', 'menuFactory', function($scope, menuFactory) {
 
         $scope.com = 'Loading ...';
 
