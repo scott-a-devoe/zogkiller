@@ -4,7 +4,7 @@ angular.module('zogkillerApp')
 
     .controller('IndexController', ['$scope', 'menuFactory', function($scope, menuFactory) {
 
-        $scope.loadingImg = 'images/loading.gif';
+        $scope.loadingImg = 'static/app/images/loading.gif';
 
     //     $scope.featuredDish = menuFactory.getDishes().get({id:0}).$promise.then(
     //         function(response){
