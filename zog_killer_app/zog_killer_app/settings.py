@@ -122,5 +122,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 if os.environ.get('USER') == 'ubuntu':
     STATICFILES_DIRS = ['/home/ubuntu/workspace/zogkiller/']
-else: 
+elif os.environ.get('USER') == 'wolf': 
     STATICFILES_DIRS = ['/home/wolf/Documents/zogkiller/']
+else:
+    STATICFILES_DIRS = ['/c/www/zogkiller/']
