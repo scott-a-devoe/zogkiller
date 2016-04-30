@@ -1,16 +1,15 @@
 {
-  "name": "conFusion",
+  "name": "zogkiller",
   "version": "1.0.0",
-  "description": "Website for an awesome restaurant",
+  "description": "Website for mah hommies",
   "main": "index.html",
   "moduleType": [],
   "keywords": [
-    "conFusion",
-    "Fusion",
-    "Restaurant"
+    "zogkiller"
   ],
   "authors": [
-    "Jogesh Muppala"
+    "Scott DeVoe",
+    "Andrew Wolfram"
   ],
   "license": "MIT",
   "homepage": "",
@@ -24,6 +23,11 @@
   "dependencies": {
     "bootstrap": "~3.3.5",
     "font-awesome": "~4.4.0",
-    "angular": "~1.4.7"
+    "angular": "~1.4.7",
+    "angular-ui-router": "~0.2.18",
+    "angular-resource": "~1.5.5"
+  },
+  "resolutions": {
+    "angular": "^1.0.8"
   }
 }
