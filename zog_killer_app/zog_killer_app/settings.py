@@ -15,7 +15,7 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
+USER = os.environ.get('USER')
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
 
@@ -23,7 +23,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'v4p7la7ci#y@175f$wrlf8%r1o3h+()tojnl#k*8!5wl^e%&^q'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+if USER == 'wolf' or USER == 'ubuntu':
+    DEBUG = True
+else:
+    DEBUG = False 
 
 ALLOWED_HOSTS = []
 
@@ -74,14 +77,28 @@ WSGI_APPLICATION = 'zog_killer_app.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+if USER == 'wolf' or USER == 'ubuntu':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'ausome_sports',
+            'USER': os.environ.get('PSQL_USERNAME'),
+            'PASSWORD': os.environ.get('PSQL_PASSWORD'),
+            'HOST': '127.0.0.1',
+            'PORT': '5432',
+        }
     }
-}
-
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'ausome_sports',
+            'USER': os.environ.get('PSQL_USERNAME'),
+            'PASSWORD': os.environ.get('PSQL_PASSWORD'),
+            'HOST': '127.0.0.1',
+            'PORT': '5432',
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
