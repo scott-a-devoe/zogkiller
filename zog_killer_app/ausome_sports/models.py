@@ -1,18 +1,16 @@
+from django.conf import settings
 from django.db import models
 
 # Create your models here.
 
-class User(models.Model):
+class AusomeUser(models.Model):
 
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=100) 
     last_name = models.CharField(max_length=100) 
     date_of_birth = models.DateField() 
     sex = models.CharField(max_length=6, choices=[('M', 'Male'), ('W', 'Female'),]) 
     e-mail = models.CharField(max_length=100) 
-    password = models.CharField(max_length=100) 
-    leagues = 
-    teams = 
-    pending_teams = 
     active = models.BooleanField() 
     picture = models.CharField(max_length=100)  
     visible_in_directory = models.BooleanField()
@@ -49,7 +47,7 @@ class Team(models.Model):
 
     name = models.CharField(max_length=50) 
     league = models.ForeignKey(League, on_delete=models.CASCADE) 
-    creator = models.ManyToManyField(User, null=True, blank=True) 
+    creator = models.ManyToManyField(AusomeUser, null=True, blank=True) 
     team_type = models.CharField(max_length=15, choices=[('R', 'Random'), ('U', 'User Generated'),]) 
     open_call = models.BooleanField(default=False) 
     date_added = models.DateTimeField(auto_now_add=True) 
@@ -63,7 +61,7 @@ class Team(models.Model):
 class TeamMember(models.Model):
 
     team = models.ForeignKey(Team, on_delete=models.CASCADE) 
-    user = models.ForeignKey(User, on_delete=models.CASCADE) 
+    user = models.ForeignKey(AusomeUser, on_delete=models.CASCADE) 
     date_added = models.DateTimeField(auto_now_add=True) 
     captain = models.BooleanField(default=False) 
 
@@ -76,7 +74,7 @@ class TeamMember(models.Model):
 class PendingTeamMember(models.Model):
 
     team = models.ForeignKey(Team, on_delete=models.CASCADE) 
-    user = models.ForeignKey(User, on_delete=models.CASCADE) 
+    user = models.ForeignKey(AusomeUser, on_delete=models.CASCADE) 
     date_added = models.DateTimeField(auto_now_add=True) 
 
     def natural_key(self):
