@@ -12,7 +12,7 @@ angular.module('zogkillerApp', ['ui.router', 'ngResource'])
                     // }
                     // ,
                     'content': {
-                        templateUrl : 'static/app/views/home.html',
+                        templateUrl : '/static/app/views/home.html',
                         controller  : 'IndexController'
                     }
                     // ,
