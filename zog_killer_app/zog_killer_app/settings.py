@@ -52,6 +52,7 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+#    'ausome_sports.reroute.RerouteMiddleware',
 ]
 
 ROOT_URLCONF = 'zog_killer_app.urls'
