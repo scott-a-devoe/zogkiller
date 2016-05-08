@@ -21,7 +21,7 @@ class AusomeUser(models.Model):
         pass
 
     def __repr__(self):
-        pass
+        return '{} {}'.format(self.first_name, self.last_name)
 
 class League(models.Model):
 
@@ -48,7 +48,7 @@ class Team(models.Model):
 
     name = models.CharField(max_length=50) 
     league = models.ForeignKey(League, on_delete=models.CASCADE) 
-    creator = models.ManyToManyField(AusomeUser, null=True, blank=True) 
+    creator = models.ForeignKey(AusomeUser) 
     team_type = models.CharField(max_length=15, choices=[('R', 'Random'), ('U', 'User Generated'),]) 
     open_registration = models.BooleanField(default=False) 
     date_added = models.DateTimeField(auto_now_add=True) 
@@ -87,7 +87,7 @@ class PendingTeamMember(models.Model):
 class Game(models.Model):
 
     league = models.ForeignKey(League, on_delete=models.CASCADE) 
-    teams = models.ManyToManyField(Team, null=True, blank=True) 
+    teams = models.ManyToManyField(Team) 
     date = models.DateTimeField() 
     location = models.TextField() 
     date_added = models.DateTimeField(auto_now_add=True) 
@@ -100,9 +100,9 @@ class Game(models.Model):
 
 class Win(models.Model):
 
-    team = models.ForeignKey(Team, on_delete=models.CASCADE, null=True, blank=True) 
+    team = models.ForeignKey(Team, on_delete=models.CASCADE) 
     game = models.ForeignKey(Game, on_delete=models.CASCADE) 
-    score = models.CharField(max_length=50, null=True, blank=True) 
+    score = models.CharField(max_length=50) 
     date_added = models.DateTimeField(auto_now_add=True) 
 
     def natural_key(self):
@@ -113,9 +113,9 @@ class Win(models.Model):
 
 class Loss(models.Model):
 
-    team = models.ForeignKey(Team, on_delete=models.CASCADE, null=True, blank=True) 
+    team = models.ForeignKey(Team, on_delete=models.CASCADE) 
     game = models.ForeignKey(Game, on_delete=models.CASCADE) 
-    score = models.CharField(max_length=50, null=True, blank=True) 
+    score = models.CharField(max_length=50) 
     date_added = models.DateTimeField(auto_now_add=True) 
 
     def natural_key(self):
