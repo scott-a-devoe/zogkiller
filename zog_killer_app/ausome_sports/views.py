@@ -1,5 +1,5 @@
 from django.core import serializers
-from django.http import JsonResponse
+from django.http import HttpResponse
 from django.shortcuts import render
 from . import models, decorators
 
@@ -10,6 +10,7 @@ def index(request):
 @decorators.login_required
 def get_user_profile(request):
     profile_set = models.AusomeUser.objects.filter(user=request.user)
+    data = serializers.serialize('json', profile_set)
     #data = serializers.serialize('json', profile_set, fields=('first_name', 'last_name'))
 
-    return JsonResponse(data=profile_set, safe=False)
+    return HttpResponse(data, content_type='application/json')
