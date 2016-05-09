@@ -23,10 +23,11 @@ USER = os.environ.get('USER')
 SECRET_KEY = 'v4p7la7ci#y@175f$wrlf8%r1o3h+()tojnl#k*8!5wl^e%&^q'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-if USER == 'wolf' or USER == 'ubuntu':
-    DEBUG = True
-else:
-    DEBUG = False 
+##if USER == 'wolf' or USER == 'ubuntu':
+##    DEBUG = True
+##else:
+##    DEBUG = False 
+DEBUG = True
 
 ALLOWED_HOSTS = []
 
