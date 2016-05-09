@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('zogkillerApp')
-  .constant('baseURL', 'http://localhost:3000/')
+  .constant('baseURL', 'url for when requesting stuff from server')
 	.service('menuFactory', ['$resource', 'baseURL', function($resource, baseURL){
 
     	var menufac = {};
