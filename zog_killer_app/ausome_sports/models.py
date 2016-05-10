@@ -20,7 +20,7 @@ class AusomeUser(models.Model):
     def natural_key(self):
         pass
 
-    def __repr__(self):
+    def __str__(self):
         return '{} {}'.format(self.first_name, self.last_name)
 
 class League(models.Model):
@@ -40,9 +40,8 @@ class League(models.Model):
     def natural_key(self):
         pass
 
-    def __repr__(self):
-        pass
-
+    def __str__(self):
+        return self.name
 
 class Team(models.Model):
 
@@ -56,8 +55,8 @@ class Team(models.Model):
     def natural_key(self):
         pass
 
-    def __repr__(self):
-        pass
+    def __str__(self):
+        return self.name
 
 class TeamMember(models.Model):
 
@@ -69,8 +68,8 @@ class TeamMember(models.Model):
     def natural_key(self):
         pass
 
-    def __repr__(self):
-        pass
+    def __str__(self):
+        return self.user.first_name
 
 class PendingTeamMember(models.Model):
 
@@ -81,8 +80,8 @@ class PendingTeamMember(models.Model):
     def natural_key(self):
         pass
 
-    def __repr__(self):
-        pass
+    def __str__(self):
+        return self.user.first_name
 
 class Game(models.Model):
 
@@ -95,8 +94,8 @@ class Game(models.Model):
     def natural_key(self):
         pass
 
-    def __repr__(self):
-        pass
+    def __str__(self):
+        return 'Game - ' + str(self.pk)
 
 class Win(models.Model):
 
@@ -108,8 +107,8 @@ class Win(models.Model):
     def natural_key(self):
         pass
 
-    def __repr__(self):
-        pass
+    def __str__(self):
+        return 'Win - ' + str(self.pk)
 
 class Loss(models.Model):
 
@@ -121,5 +120,5 @@ class Loss(models.Model):
     def natural_key(self):
         pass
 
-    def __repr__(self):
-        pass
+    def __str__(self):
+        return 'Loss - ' + str(self.pk)

@@ -11,6 +11,5 @@ def index(request):
 def get_user_profile(request):
     profile_set = models.AusomeUser.objects.filter(user=request.user)
     data = serializers.serialize('json', profile_set)
-    #data = serializers.serialize('json', profile_set, fields=('first_name', 'last_name'))
 
     return HttpResponse(data, content_type='application/json')
