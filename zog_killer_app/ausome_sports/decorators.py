@@ -22,7 +22,9 @@ def user_passes_test(test_func, login_url=None, redirect_field_name=REDIRECT_FIE
         def _wrapped_view(request, *args, **kwargs):
             if test_func(request.user):
                 return view_func(request, *args, **kwargs)
-            return JsonResponse({'status': 'Permission Denied'}) 
+            denied = JsonResponse({'status': 'Permission Denied'}) 
+            denied.status_code = 403
+            return denied 
         return _wrapped_view
     return decorator
 
