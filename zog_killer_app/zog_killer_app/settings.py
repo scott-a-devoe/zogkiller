@@ -143,5 +143,7 @@ if os.environ.get('USER') == 'ubuntu':
     STATICFILES_DIRS = ['/home/ubuntu/workspace/zogkiller/']
 elif os.environ.get('USER') == 'wolf': 
     STATICFILES_DIRS = ['/home/wolf/Documents/zogkiller/']
+elif os.environ.get('USER') == 'andrew.wolfram': 
+    STATICFILES_DIRS = ['/Users/andrew.wolfram/Documents/PIE_REPO/zogkiller/']
 else:
     STATICFILES_DIRS = ['C:\www\zogkiller']
