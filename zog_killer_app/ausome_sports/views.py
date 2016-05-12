@@ -55,9 +55,12 @@ def post_create_user(request):
             password,
             )
     user.first_name = bleach.clean(request.POST.get('first_name'))
-    user.last_name = bleach.clean(request.POST.get('first_name'))
-    user.dob = dateparse.parse_date(request.POST.get('first_name'))
-    user.sex = bleach.clean(request.POST.get('first_name'))
-    user.phone = bleach.clean(request.POST.get('first_name'))
-    user.visible_in_directory = True if request.POST.get('first_name').lower() == 'y' else False 
+    user.last_name = bleach.clean(request.POST.get('last_name'))
+    user.dob = dateparse.parse_date(request.POST.get('dob'))
+    user.sex = bleach.clean(request.POST.get('sex')).lower()
+    user.phone = bleach.clean(request.POST.get('phone'))
+    user.visible_in_directory = True if request.POST.get('visible_in_directory').lower() == 'y' else False 
     user.save()
+
+    data = {'msg': 'Acount created!'}
+    return HttpResponse(json.dumps(data), content_type='application/json')
