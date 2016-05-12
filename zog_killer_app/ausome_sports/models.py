@@ -11,11 +11,10 @@ class AusomeUser(models.Model):
     dob = models.DateField() 
     sex = models.CharField(max_length=6, choices=[('M', 'Male'), ('W', 'Female'),]) 
     email = models.CharField(max_length=100) 
-    active = models.BooleanField() 
-    picture = models.CharField(max_length=100)  
-    bio = models.CharField(max_length=500)  
-    visible_in_directory = models.BooleanField()
-    date_added = models.DateTimeField(auto_now_add=True) 
+    picture = models.CharField(max_length=100, null=True, blank=True)  
+    phone = models.CharField(max_length=100)  
+    bio = models.CharField(max_length=500, null=True, blank=True)  
+    visible_in_directory = models.BooleanField(default=True)
 
     def natural_key(self):
         pass
