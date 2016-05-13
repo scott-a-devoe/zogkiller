@@ -1,6 +1,8 @@
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User 
+from django.contrib.auth.password_validation import validate_password
 from django.core import serializers
+from django.core.exceptions import ValidationError as DjangoValidationError 
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.utils import dateparse
@@ -9,10 +11,9 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 import bleach
 import json
 from jsonschema import validate
-from jsonschema.exceptions import ValidationError 
+from jsonschema.exceptions import ValidationError as JsonValidationError
 from . import models, decorators
 
-# Create your views here.
 @ensure_csrf_cookie
 def index(request):
     return render(request, 'ausome_sports/index.html')
@@ -49,17 +50,28 @@ def post_login(request):
 def post_create_user(request):
     # check for existing username
 
+    # Validate POST contents
     try:
         validate(request.POST, schema.new_account)
-    except ValidationError as error:
-        data = {'msg': error.message}
+    except JsonValidationError as error:
+        error_msg = error.schema.get('error_msg')
+        data = {'msg': error_msg if error_msg not None else error.message}
         invalid = HttpResponse(json.dumps(data), content_type='application/json')
         invalid.status_code = 400
         return invalid 
 
     username = bleach.clean(request.POST.get('username'))
+    
     password = request.POST.get('password')
     # validate password
+    try:
+        validate_password(password)
+    except DjangoValidationError as error:
+        data = {'msg': error.message}
+        invalid = HttpResponse(json.dumps(data), content_type='application/json')
+        invalid.status_code = 400
+        return invalid 
+
     email = bleach.clean(request.POST.get('email'))
     user = User.objects.create_user(username,
             email,
