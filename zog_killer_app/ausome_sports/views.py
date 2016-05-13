@@ -48,19 +48,32 @@ def post_login(request):
 
 @require_POST
 def post_create_user(request):
-    # check for existing username
 
     # Validate POST contents
     try:
         validate(request.POST, schema.new_account)
     except JsonValidationError as error:
         error_msg = error.schema.get('error_msg')
-        data = {'msg': error_msg if error_msg not None else error.message}
+        data = {'msg': error_msg if error_msg != None else error.message}
         invalid = HttpResponse(json.dumps(data), content_type='application/json')
         invalid.status_code = 400
         return invalid 
 
     username = bleach.clean(request.POST.get('username'))
+    email = bleach.clean(request.POST.get('email'))
+
+    # check for existing username or email address
+    if not models.AusomeUser.objects.filter(username=username).exists():
+        data = {'msg': 'Username already exists'}
+        invalid = HttpResponse(json.dumps(data), content_type='application/json')
+        invalid.status_code = 400
+        return invalid 
+    elif not models.AusomeUser.objects.filter(email=email).exists():
+        data = {'msg': 'An account already exists with that e-mail address'}
+        invalid = HttpResponse(json.dumps(data), content_type='application/json')
+        invalid.status_code = 400
+        return invalid 
+
     
     password = request.POST.get('password')
     # validate password
@@ -72,25 +85,36 @@ def post_create_user(request):
         invalid.status_code = 400
         return invalid 
 
-    email = bleach.clean(request.POST.get('email'))
+    # create auth user
     user = User.objects.create_user(username,
             email,
             password,
             )
-    user.first_name = bleach.clean(request.POST.get('first_name'))
-    user.last_name = bleach.clean(request.POST.get('last_name'))
+    ausome_user = AusomeUser(user=user, email=email)
+    ausome_user.first_name = bleach.clean(request.POST.get('first_name'))
+    ausome_user.last_name = bleach.clean(request.POST.get('last_name'))
+
+    # attempt to parse date string
     try:
-        user.dob = dateparse.parse_date(request.POST.get('dob'))
+        ausome_user.dob = dateparse.parse_date(request.POST.get('dob'))
     except ValueError as error:
         data = {'msg': error.message}
         invalid = HttpResponse(json.dumps(data), content_type='application/json')
         invalid.status_code = 400
         return invalid 
 
-    user.sex = bleach.clean(request.POST.get('sex')).lower()
-    user.phone = bleach.clean(request.POST.get('phone'))
-    user.visible_in_directory = True if request.POST.get('visible_in_directory').lower() == 'y' else False 
-    user.save()
+    ausome_user.sex = bleach.clean(request.POST.get('sex')).lower()
+    ausome_user.phone = bleach.clean(request.POST.get('phone'))
+    ausome_user.visible_in_directory = True if request.POST.get('visible_in_directory').lower() == 'y' else False 
+
+    # attempt to save to database
+    try:
+        ausome_user.save()
+    except:
+        data = {'msg': 'Account creation failed!'}
+        invalid = HttpResponse(json.dumps(data), content_type='application/json')
+        invalid.status_code = 400
+        return invalid 
 
     data = {'msg': 'Account created!'}
     return HttpResponse(json.dumps(data), content_type='application/json')
