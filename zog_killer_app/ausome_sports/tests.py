@@ -25,17 +25,23 @@ def create_ausome_user():
 
 
 # Create your tests here.
-class LoginViewTest(TestCase):
+class ViewTest(TestCase):
 
     @classmethod
     def setUpTestData(cls):
         cls.ausome_user = create_ausome_user()
-    
-    @decorators.test_login_required('user_profile')
-    def test_user_profile(self):
+
+    def verify_login_required(self, view_name):
+        response = self.client.get(reverse(view_name))
+        self.assertEqual(response.status_code, 403)
+
         self.client.post(reverse('post_login'), 
                 {'username': 'testuser', 'password': 'password'}
                 )
 
-        response = self.client.get(reverse('user_profile'))
+        response = self.client.get(reverse(view_name))
         self.assertEqual(response.status_code, 200)
+        return response
+    
+    def test_user_profile(self):
+        response = self.verify_login_required('user_profile')
