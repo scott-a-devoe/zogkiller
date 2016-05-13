@@ -1,13 +1,24 @@
 from functools import wraps
-
 from django.conf import settings
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.core.exceptions import PermissionDenied
+from django.core.urlresolvers import reverse
 from django.http import JsonResponse
 from django.shortcuts import resolve_url
 from django.utils import six
 from django.utils.decorators import available_attrs
 from django.utils.six.moves.urllib.parse import urlparse
+
+def test_login_required(view_name):
+
+    def decorator(test_func):
+        @wraps(test_func, assigned=available_attrs(test_func))
+        def test_login_required_decorator(self, *args, **kwargs):
+            response = self.client.get(reverse(view_name))
+            self.assertEqual(response.status_code, 403)
+            test_func(self, *args, **kwargs)
+        return test_login_required_decorator 
+    return decorator
 
 
 def user_passes_test(test_func, login_url=None, redirect_field_name=REDIRECT_FIELD_NAME):

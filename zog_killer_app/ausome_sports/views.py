@@ -90,7 +90,7 @@ def post_create_user(request):
             email,
             password,
             )
-    ausome_user = AusomeUser(user=user, email=email)
+    ausome_user = AusomeUser(user=user, email=user.email)
     ausome_user.first_name = bleach.clean(request.POST.get('first_name'))
     ausome_user.last_name = bleach.clean(request.POST.get('last_name'))
 
