@@ -1,9 +1,11 @@
 from django.contrib.auth.models import User 
+from django.core import serializers
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.utils import dateparse
 
 from datetime import date, datetime
+import json
 from . import models, decorators
 
 def create_ausome_user():
@@ -26,15 +28,15 @@ def create_ausome_user():
 
     return ausome_user
 
-def verify_login_required(self, view_name):
-    response = self.client.get(reverse(view_name))
+def verify_login_required(self, view_name, args=None):
+    response = self.client.get(reverse(view_name, args=args))
     self.assertEqual(response.status_code, 403)
 
     self.client.post(reverse('post_login'), 
             {'username': 'testuser', 'password': 'password99'}
             )
 
-    response = self.client.get(reverse(view_name))
+    response = self.client.get(reverse(view_name, args=args))
     self.assertEqual(response.status_code, 200)
     return response
 
@@ -133,3 +135,36 @@ class ProfileUpdateTest(TestCase):
         self.assertEqual(ausome_user.picture, 'example.jpg')
         self.assertEqual(ausome_user.phone, '12334556789')
         self.assertEqual(ausome_user.visible_in_directory, False)
+
+class LeaguesBySportStatusTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.ausome_user = create_ausome_user()
+        cls.league = models.League() 
+        cls.league.name = 'Beach Volleyball'
+        cls.league.sport = 'volleyball'
+        cls.league.city = 'Austin'
+        cls.league.state = 'TX'
+        cls.league.country = 'US'
+        cls.league.start_date = dateparse.parse_date('2016-06-15') 
+        cls.league.end_date = dateparse.parse_date('2016-08-15') 
+        cls.league.description = 'Advanced beach volleyball played Wednesday nights at Zilker park'
+        cls.league.difficulty = 'advanced'
+        cls.league.status = 'open'
+        cls.league.date_added = dateparse.parse_datetime('2000-08-02 14:00:00') 
+        cls.league.save()
+    
+    def test_leagues_by_sport_status_success(self):
+        response = verify_login_required(self, 'leagues_by_sport_status', args=['volleyball', 'open'])
+        self.assertEqual(response['Content-Type'], 'application/json')
+
+        data = serializers.serialize('json', [self.league])
+        self.assertEqual(data, response.json())
+
+    def test_leagues_by_sport_status_no_results(self):
+        response = verify_login_required(self, 'leagues_by_sport_status', args=['kickball', 'open'])
+        self.assertEqual(response['Content-Type'], 'application/json')
+
+        data = serializers.serialize('json', [])
+        self.assertEqual(data, response.json())
