@@ -1,11 +1,14 @@
 'use strict';
 
 angular.module('zogkillerApp', ['ui.router', 'ngResource'])
-    .config(function($stateProvider, $urlRouterProvider) {
+    .config(['$stateProvider', '$urlRouterProvider', '$locationProvider', function($stateProvider, $urlRouterProvider, $locationProvider) {
+
+        $locationProvider.html5Mode(true);
+
         $stateProvider
             // route for the home page
             .state('app', {
-                url:'/',
+                url:'',
                 views: {
                     // 'header': {
                     //     templateUrl : 'views/header/.html',
@@ -13,12 +16,22 @@ angular.module('zogkillerApp', ['ui.router', 'ngResource'])
                     // ,
                     'content': {
                         templateUrl : '/static/app/views/home.html',
-                        controller  : 'IndexController'
+                        controller  : 'HomeController'
                     }
                     // ,
                     // 'footer': {
                     //     templateUrl : 'views/footer.html',
                     // }
+                }
+            })
+
+            .state('app.leagues', {
+                url:'/leagues',
+                views: {
+                    'content@': {
+                        templateUrl : '/static/app/views/leagues.html',
+                        controller  : 'LeagueController'
+                    }
                 }
             })
         
@@ -46,5 +59,5 @@ angular.module('zogkillerApp', ['ui.router', 'ngResource'])
 
         ;
         $urlRouterProvider.otherwise('/');
-    })
+    }])
 ;

@@ -2,10 +2,17 @@
 
 angular.module('zogkillerApp')
 
-    .controller('IndexController', ['$scope', 'menuFactory', function($scope, menuFactory) {
+    .controller('HomeController', ['$scope', 'homeFactory', function($scope, homeFactory) {
 
-        var dir = '/static/'
-        $scope.loadingImg = dir + 'app/images/loading.gif';
+        var dir = '/static/app/'
+        $scope.topBanner = dir + 'images/scottwolf.jpg';
+        $scope.loadingImg = dir + 'images/loading.gif';
+
+    }])
+
+    .controller('LeagueController', ['$scope', function($scope) {
+        
+    }])
 
 
     //     $scope.featuredDish = menuFactory.getDishes().get({id:0}).$promise.then(
@@ -42,7 +49,7 @@ angular.module('zogkillerApp')
     //         }
     //     );
 
-    }])
+    // }])
 
     // .controller('AboutController', ['$scope', '$stateParams', 'corporateFactory', function($scope, $stateParams, corporateFactory) {
         

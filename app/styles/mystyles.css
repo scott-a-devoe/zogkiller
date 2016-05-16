@@ -1,3 +1,30 @@
 * {
-  outline: 1px solid green;
+  /*outline: 1px solid green;*/
+}
+
+.overlay {
+	width:1280px;
+	height:593px;
+	position:absolute;
+	top:0;
+	left:0;
+	background-color:black;
+	opacity:0.7;
+}
+
+.overlayContent {
+	width:1280px;
+	position:absolute;
+	top:0;
+	left:0;
+	margin:86px 0;
+}
+
+.hasOverlay {
+	position:relative;
+}
+
+#homeButtons {
+	text-align:center;
+	padding: 200px 0;
 }
