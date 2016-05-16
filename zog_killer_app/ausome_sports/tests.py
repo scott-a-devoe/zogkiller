@@ -141,6 +141,7 @@ class LeaguesBySportStatusTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.ausome_user = create_ausome_user()
+
         cls.league = models.League() 
         cls.league.name = 'Beach Volleyball'
         cls.league.sport = 'volleyball'
@@ -152,6 +153,7 @@ class LeaguesBySportStatusTest(TestCase):
         cls.league.description = 'Advanced beach volleyball played Wednesday nights at Zilker park'
         cls.league.difficulty = 'advanced'
         cls.league.status = 'open'
+        cls.league.team_max = 10
         cls.league.date_added = dateparse.parse_datetime('2000-08-02 14:00:00') 
         cls.league.save()
     
@@ -168,3 +170,64 @@ class LeaguesBySportStatusTest(TestCase):
 
         data = serializers.serialize('json', [])
         self.assertEqual(data, response.json())
+
+class JoinRandomTeamTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.ausome_user = create_ausome_user()
+
+        cls.league = models.League() 
+        cls.league.name = 'Beach Volleyball'
+        cls.league.sport = 'volleyball'
+        cls.league.city = 'Austin'
+        cls.league.state = 'TX'
+        cls.league.country = 'US'
+        cls.league.start_date = dateparse.parse_date('2016-06-15') 
+        cls.league.end_date = dateparse.parse_date('2016-08-15') 
+        cls.league.description = 'Advanced beach volleyball played Wednesday nights at Zilker park'
+        cls.league.difficulty = 'advanced'
+        cls.league.status = 'open'
+        cls.league.team_max = 10
+        cls.league.save()
+
+        cls.team = models.Team()
+        cls.team.name = 'Awaiting assignment'
+        cls.team.league = cls.league
+        cls.team.creator = cls.ausome_user
+        cls.team.team_type = 'R'
+        cls.team.player_max = 10 
+        cls.team.open_registration = False
+        cls.team.save()
+    
+    def test_join_random_team_success(self):
+        # verify that login is required
+        data = {'league': str(self.league.pk), 'team': str(self.team.pk),}
+        response = self.client.post(reverse('join_team'), data)
+        self.assertEqual(response['Content-Type'], 'application/json')
+
+        self.assertEqual(response.status_code, 403) 
+
+        # log in
+        self.client.post(reverse('post_login'), 
+            {'username': 'testuser', 'password': 'password99'}
+            )
+
+        response = self.client.post(reverse('join_team'), data)
+        self.assertEqual(response['Content-Type'], 'application/json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['msg'], "You've successfully joined!") 
+
+        team_member = models.TeamMember.objects.get(user=self.ausome_user)
+
+        self.assertTrue(team_member!= None)
+        self.assertTrue(team_member.team == self.team)
+
+    def test_join_specific_team_success(self):
+        pass
+
+    def test_join_open_call_team_success(self):
+        pass
+
+    def test_already_joined_team(self):
+        pass
