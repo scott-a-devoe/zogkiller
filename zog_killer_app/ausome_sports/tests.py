@@ -131,10 +131,7 @@ class JoinRandomTeamTest(TestCase):
     def setUpTestData(cls):
         cls.ausome_user = utils.create_ausome_user()
         cls.league = utils.create_ausome_league() 
-        cls.team = utils.create_ausome_team()
-        cls.team.league = cls.league
-        cls.team.creator = cls.ausome_user
-        cls.team.save()
+        cls.team = utils.create_ausome_team(leage=cls.league, creator=cls.ausome_user)
     
     def test_join_random_team_success(self):
         # verify that login is required
@@ -174,10 +171,7 @@ class CreateTeamTest(TestCase):
     def setUpTestData(cls):
         cls.ausome_user = utils.create_ausome_user()
         cls.league = utils.create_ausome_league()
-        cls.team = utils.create_ausome_team()
-        cls.team.league = cls.league
-        cls.team.creator = cls.ausome_user
-        cls.team.save()
+        cls.team = utils.create_ausome_team(leage=cls.league, creator=cls.ausome_user)
 
     def test_create_team_whole_success(self):
         # verify that login is required
@@ -213,3 +207,28 @@ class CreateTeamTest(TestCase):
 
     def test_create_team_individual_success(self):
         pass
+
+    def test_create_team_missing_post_data(self):
+        pass
+
+    def test_create_team_league_does_not_exits(self):
+        pass
+
+    def test_create_team_league_signup_closed(self):
+        pass
+
+    def test_create_team_user_already_in_a_team(self):
+        pass
+
+    def test_create_team_above_team_max(self):
+        pass
+
+    def test_create_team_above_player_max(self):
+        pass
+
+    def test_create_team_name_already_exists(self):
+        pass
+
+    def test_create_team_no_password(self):
+        pass
+
