@@ -116,3 +116,30 @@ join_team = {
        'team',
        ],
    }
+
+create_team = {
+    'type': 'object',
+    'properties': {
+        'league': {'type': 'string',
+            'pattern': '\d+',
+            'maxLength': 6,
+	    'error_msg': 'League id can only contain numbers',},
+        'team_name': {'type': 'string',
+            'pattern': '[\w\s]{3,}$',
+            'maxLength': 100,
+	    'error_msg': 'Team name must be at least 3 characters long and contain only alphanumerical characters, underscores, and spaces',},
+        'team_password': {'type': 'string',
+            'pattern': '^[a-zA-Z0-9~!@#$%^&*]{6,}$',
+            'maxLength': 50,
+	    'error_msg': 'Password can only contain alphanumerical characters and ~!@#$%^&* and must be at least 6 characters long',},
+        'payment_plan': {'type': 'string',
+            'pattern': '^team whole|team per person$',
+            'maxLength': 20,
+	    'error_msg': 'Incorrect payment plan type',},
+        },
+    'required': [
+       'league',
+       'team_name',
+       'payment_plan',
+       ],
+   }

@@ -232,23 +232,30 @@ def post_join_team(request):
         invalid.status_code = 400
         return invalid 
 
-    # check if user is already a member of a team in this league
-    ausome_user = models.AusomeUser.objects.get(user=request.user)
-    all_team_members = models.TeamMember.objects.filter(user=ausome_user)
-    teams = [member.team for member in all_team_members]
-    league_id = int(request.POST['league'])
-    league_ids = [t.league.pk for t in teams]
-    if league_id in league_ids: 
-        data = {'msg': "You're already on a team in this league! Sorry, but you can only join one team per league."}
-        invalid = HttpResponse(json.dumps(data), content_type='application/json')
-        invalid.status_code = 400
-        return invalid 
-
     # check if league exists 
+    league_id = int(request.POST['league'])
     try:
         league = models.League.objects.get(pk=league_id)
     except models.League.DoesNotExist:
         data = {'msg': 'No league found with that id'}
+        invalid = HttpResponse(json.dumps(data), content_type='application/json')
+        invalid.status_code = 400
+        return invalid 
+
+    # check if league registration still open 
+    if league.status != 'open':
+        data = {'msg': 'Sorry, this league is not open for registration.'}
+        invalid = HttpResponse(json.dumps(data), content_type='application/json')
+        invalid.status_code = 400
+        return invalid 
+
+    # check if user is already a member of a team in this league
+    ausome_user = models.AusomeUser.objects.get(user=request.user)
+    all_team_members = models.TeamMember.objects.filter(user=ausome_user)
+    teams = [member.team for member in all_team_members]
+    league_ids = [t.league.pk for t in teams]
+    if league_id in league_ids: 
+        data = {'msg': "You're already on a team in this league! Sorry, but you can only join one team per league."}
         invalid = HttpResponse(json.dumps(data), content_type='application/json')
         invalid.status_code = 400
         return invalid 
@@ -281,16 +288,16 @@ def post_join_team(request):
             invalid.status_code = 400
             return invalid 
 
-    # if random user check that current teams plus random signup is less than limit
+    # if random user or paying team per person check that current teams plus random signup is less than limit
     if team.team_type == 'R' or team.payment_plan == 'team per person': 
         max_players = team.player_max * league.team_max 
         paid_team_slots = models.Team.objects.filter(team_type='U', payment_plan='team whole').count() * team.player_max
-        random_team = team if team.team_type == 'R' else models.Team.objects.filter(league=league, team_type='R')
+        random_team = team if team.team_type == 'R' else models.Team.objects.filter(league=league, team_type='R')[0]
         random_players = models.TeamMember.objects.filter(team=random_team).count() 
         other_team_slots = 0
-        other_teams = models.Team.objects.filter(league=league, team_type='U', payment_plan='individual')
+        other_teams = models.Team.objects.filter(league=league, team_type='U', payment_plan='team per person')
         for ot in other_teams:
-            other_team_slots = other_team_slots + models.TeamMember.objects.filter(team=ot).count()
+            other_team_slots = other_team_slots + ot.teammember_set.count()
         total_players = paid_team_slots + other_team_slots + random_players
         if total_players >= max_players:
             data = {'msg': 'Sorry, but this team is full!'}
@@ -303,7 +310,7 @@ def post_join_team(request):
         new_team_member = models.TeamMember(user=ausome_user, team=team)
     else:
         # add user to password protected team
-        password = request.POST.get('password') 
+        password = request.POST.get('team_password') 
         if team.team_password == 'NULL':
             data = {'msg': "That's odd. There's no password set."}
             invalid = HttpResponse(json.dumps(data), content_type='application/json')
@@ -331,4 +338,126 @@ def post_join_team(request):
         return invalid 
 
     data = {'msg': "You've successfully joined!"}
+    return HttpResponse(json.dumps(data), content_type='application/json')
+
+@require_POST
+@decorators.login_required
+def post_create_team(request):
+    # validate schema contains league # and team id (digits or the word random) and optionally team password  
+    try: 
+        validate(request.POST, schema.create_team)
+    except JsonValidationError as error:
+        error_msg = error.schema.get('error_msg')
+        data = {'msg': error_msg if error_msg != None else error.message}
+        invalid = HttpResponse(json.dumps(data), content_type='application/json')
+        invalid.status_code = 400
+        return invalid 
+
+    # check if league exists 
+    league_id = int(request.POST['league'])
+    try:
+        league = models.League.objects.get(pk=league_id)
+    except models.League.DoesNotExist:
+        data = {'msg': 'No league found with that id'}
+        invalid = HttpResponse(json.dumps(data), content_type='application/json')
+        invalid.status_code = 400
+        return invalid 
+
+    # check if league registration still open 
+    if league.status != 'open':
+        data = {'msg': 'Sorry, this league is not open for registration.'}
+        invalid = HttpResponse(json.dumps(data), content_type='application/json')
+        invalid.status_code = 400
+        return invalid 
+
+    # ensure user not already on a team in this league
+    ausome_user = models.AusomeUser.objects.get(user=request.user)
+    all_team_members = models.TeamMember.objects.filter(user=ausome_user)
+    teams = [member.team for member in all_team_members]
+    league_ids = [t.league.pk for t in teams]
+    if league_id in league_ids: 
+        data = {'msg': "You're already on a team in this league! Sorry, but you can only join one team per league."}
+        invalid = HttpResponse(json.dumps(data), content_type='application/json')
+        invalid.status_code = 400
+        return invalid 
+
+    # ensure below team max for league if paying for whole team
+    current_team_count = models.Team.objects.filter(league=league, payment_plan='team whole').count()
+    if current_team_count >= league.team_max:
+        data = {'msg': "Sorry, but this league is full"}
+        invalid = HttpResponse(json.dumps(data), content_type='application/json')
+        invalid.status_code = 400
+        return invalid 
+
+    # ensure below player max for league if creating team but paying by individual 
+    random_team = models.Team.objects.filter(league=league, team_type='R')[0]
+    if request.POST['payment_plan'] == 'team per person': 
+        random_team = models.Team.objects.filter(league=league, team_type='R')[0]
+        player_max = random_team.player_max
+        max_players = player_max * league.team_max 
+        paid_team_slots = models.Team.objects.filter(team_type='U', payment_plan='team whole').count() * player_max
+        random_players = random_team.teammember_set.count() 
+        other_team_slots = 0
+        other_teams = models.Team.objects.filter(league=league, team_type='U', payment_plan='team per person')
+        for ot in other_teams:
+            other_team_slots = other_team_slots + ot.teammember_set.count()
+        total_players = paid_team_slots + other_team_slots + random_players
+        if total_players >= max_players:
+            data = {'msg': 'Sorry, but this league is full'}
+            invalid = HttpResponse(json.dumps(data), content_type='application/json')
+            invalid.status_code = 400
+            return invalid 
+
+    # ensure unique team name
+    team_name = request.POST['team_name'].lower()
+    if models.Team.objects.filter(name=team_name).exists():
+        data = {'msg': 'Sorry, but this team name is taken'}
+        invalid = HttpResponse(json.dumps(data), content_type='application/json')
+        invalid.status_code = 400
+        return invalid 
+
+    # ensure password if team paying in full
+    password = request.POST.get('team_password') 
+    if password == None:
+        data = {'msg': 'Please enter a password'}
+        invalid = HttpResponse(json.dumps(data), content_type='application/json')
+        invalid.status_code = 400
+        return invalid 
+
+    # create team and add user to team
+    new_team = models.Team()
+    new_team.name = team_name
+    new_team.league = league
+    new_team.creator = ausome_user
+    # creates mad coupling
+    new_team.player_max = random_team.player_max
+    new_team.team_type = 'U'
+    new_team.payment_plan = request.POST['payment_plan'] 
+    if request.POST['payment_plan'] == 'team whole':
+        new_team.team_password = password
+    if request.POST['payment_plan'] == 'team per person':
+        new_team.open_registration = True
+
+    try:
+        new_team.save()
+    except:
+        data = {'msg': 'Unable to create team'}
+        invalid = HttpResponse(json.dumps(data), content_type='application/json')
+        invalid.status_code = 400
+        return invalid 
+
+    new_team_member = models.TeamMember()
+    new_team_member.user = ausome_user
+    new_team_member.team = new_team
+    new_team_member.is_captain = True 
+
+    try:
+        new_team_member.save()
+    except:
+        data = {'msg': 'Team created, but unable to add you to it'}
+        invalid = HttpResponse(json.dumps(data), content_type='application/json')
+        invalid.status_code = 400
+        return invalid 
+
+    data = {'msg': "You've successfully created a team!"}
     return HttpResponse(json.dumps(data), content_type='application/json')

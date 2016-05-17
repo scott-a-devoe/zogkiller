@@ -6,39 +6,7 @@ from django.utils import dateparse
 
 from datetime import date, datetime
 import json
-from . import models, decorators
-
-def create_ausome_user():
-    auth_user = User.objects.create_user(username='testuser',
-            email='test@test.com',
-            password='password99',
-            )
-    ausome_user = models.AusomeUser()
-    ausome_user.user = auth_user
-    ausome_user.email = auth_user.email
-    ausome_user.first_name = 'First'
-    ausome_user.last_name = 'Last'
-    ausome_user.dob = dateparse.parse_date('1990-01-02')
-    ausome_user.sex = 'male'
-    ausome_user.picture = 'example.jpg'
-    ausome_user.phone = '12334556788'
-    ausome_user.bio = 'Spike it real good!'
-    ausome_user.visible_in_directory = True
-    ausome_user.save()
-
-    return ausome_user
-
-def verify_login_required(self, view_name, args=None):
-    response = self.client.get(reverse(view_name, args=args))
-    self.assertEqual(response.status_code, 403)
-
-    self.client.post(reverse('post_login'), 
-            {'username': 'testuser', 'password': 'password99'}
-            )
-
-    response = self.client.get(reverse(view_name, args=args))
-    self.assertEqual(response.status_code, 200)
-    return response
+from . import models, decorators, utils
 
 
 # Create your tests here.
@@ -46,10 +14,10 @@ class UserProfileTest(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.ausome_user = create_ausome_user()
+        cls.ausome_user = utils.create_ausome_user()
 
     def test_user_profile(self):
-        response = verify_login_required(self, 'user_profile')
+        response = utils.verify_login_required(self, 'user_profile')
         self.assertEqual(response['Content-Type'], 'application/json')
 
 class AccountCreationTest(TestCase):
@@ -140,32 +108,18 @@ class LeaguesBySportStatusTest(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.ausome_user = create_ausome_user()
-
-        cls.league = models.League() 
-        cls.league.name = 'Beach Volleyball'
-        cls.league.sport = 'volleyball'
-        cls.league.city = 'Austin'
-        cls.league.state = 'TX'
-        cls.league.country = 'US'
-        cls.league.start_date = dateparse.parse_date('2016-06-15') 
-        cls.league.end_date = dateparse.parse_date('2016-08-15') 
-        cls.league.description = 'Advanced beach volleyball played Wednesday nights at Zilker park'
-        cls.league.difficulty = 'advanced'
-        cls.league.status = 'open'
-        cls.league.team_max = 10
-        cls.league.date_added = dateparse.parse_datetime('2000-08-02 14:00:00') 
-        cls.league.save()
+        cls.ausome_user = utils.create_ausome_user()
+        cls.league = utils.create_ausome_league() 
     
     def test_leagues_by_sport_status_success(self):
-        response = verify_login_required(self, 'leagues_by_sport_status', args=['volleyball', 'open'])
+        response = utils.verify_login_required(self, 'leagues_by_sport_status', args=['volleyball', 'open'])
         self.assertEqual(response['Content-Type'], 'application/json')
 
         data = serializers.serialize('json', [self.league])
         self.assertEqual(data, response.json())
 
     def test_leagues_by_sport_status_no_results(self):
-        response = verify_login_required(self, 'leagues_by_sport_status', args=['kickball', 'open'])
+        response = utils.verify_login_required(self, 'leagues_by_sport_status', args=['kickball', 'open'])
         self.assertEqual(response['Content-Type'], 'application/json')
 
         data = serializers.serialize('json', [])
@@ -175,29 +129,11 @@ class JoinRandomTeamTest(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.ausome_user = create_ausome_user()
-
-        cls.league = models.League() 
-        cls.league.name = 'Beach Volleyball'
-        cls.league.sport = 'volleyball'
-        cls.league.city = 'Austin'
-        cls.league.state = 'TX'
-        cls.league.country = 'US'
-        cls.league.start_date = dateparse.parse_date('2016-06-15') 
-        cls.league.end_date = dateparse.parse_date('2016-08-15') 
-        cls.league.description = 'Advanced beach volleyball played Wednesday nights at Zilker park'
-        cls.league.difficulty = 'advanced'
-        cls.league.status = 'open'
-        cls.league.team_max = 10
-        cls.league.save()
-
-        cls.team = models.Team()
-        cls.team.name = 'Awaiting assignment'
+        cls.ausome_user = utils.create_ausome_user()
+        cls.league = utils.create_ausome_league() 
+        cls.team = utils.create_ausome_team()
         cls.team.league = cls.league
         cls.team.creator = cls.ausome_user
-        cls.team.team_type = 'R'
-        cls.team.player_max = 10 
-        cls.team.open_registration = False
         cls.team.save()
     
     def test_join_random_team_success(self):
@@ -230,4 +166,50 @@ class JoinRandomTeamTest(TestCase):
         pass
 
     def test_already_joined_team(self):
+        pass
+
+class CreateTeamTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.ausome_user = utils.create_ausome_user()
+        cls.league = utils.create_ausome_league()
+        cls.team = utils.create_ausome_team()
+        cls.team.league = cls.league
+        cls.team.creator = cls.ausome_user
+        cls.team.save()
+
+    def test_create_team_whole_success(self):
+        # verify that login is required
+        data = {'league': str(self.league.pk), 
+                'team_name': 'Mighty ducks',
+                'team_password': 'password99',
+                'payment_plan': 'team whole',
+                }
+        response = self.client.post(reverse('create_team'), data)
+        self.assertEqual(response['Content-Type'], 'application/json')
+
+        self.assertEqual(response.status_code, 403) 
+
+        # log in
+        self.client.post(reverse('post_login'), 
+            {'username': 'testuser', 'password': 'password99'}
+            )
+
+        response = self.client.post(reverse('create_team'), data)
+        self.assertEqual(response['Content-Type'], 'application/json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['msg'], "You've successfully created a team!") 
+
+        team = models.Team.objects.get(league=self.league, name=data['team_name'].lower())
+        self.assertEqual(team.league.pk, int(data['league']))
+        self.assertEqual(team.name, data['team_name'].lower())
+        self.assertEqual(team.creator, self.ausome_user)
+        self.assertEqual(team.team_password, data['team_password'])
+        self.assertEqual(team.payment_plan, data['payment_plan'])
+
+        team_member = team.teammember_set.filter()[0]
+        self.assertEqual(team_member.user, self.ausome_user)
+
+    def test_create_team_individual_success(self):
         pass
