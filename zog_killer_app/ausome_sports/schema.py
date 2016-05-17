@@ -94,3 +94,25 @@ update_account = {
 	    'error_msg': 'Visible in directory must be either "y" or "n"',},
         },
    }
+
+join_team = {
+    'type': 'object',
+    'properties': {
+        'league': {'type': 'string',
+            'pattern': '\d+',
+            'maxLength': 6,
+	    'error_msg': 'League id can only contain numbers',},
+        'team': {'type': 'string',
+            'pattern': 'random|\d+',
+            'maxLength': 6,
+	    'error_msg': 'Team id can only contain numbers',},
+        'team_password': {'type': 'string',
+            'pattern': '^[a-zA-Z0-9~!@#$%^&*]{6,}$',
+            'maxLength': 50,
+	    'error_msg': 'Password can only contain alphanumerical characters and ~!@#$%^&* and must be at least 6 characters long',},
+        },
+    'required': [
+       'league',
+       'team',
+       ],
+   }

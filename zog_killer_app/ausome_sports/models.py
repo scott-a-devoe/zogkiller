@@ -34,6 +34,7 @@ class League(models.Model):
     description = models.TextField() 
     difficulty = models.CharField(max_length=20) 
     status = models.CharField(max_length=20) 
+    team_max = models.IntegerField() 
     date_added = models.DateTimeField(auto_now_add=True) 
     
     def natural_key(self):
@@ -47,8 +48,16 @@ class Team(models.Model):
     name = models.CharField(max_length=50) 
     league = models.ForeignKey(League, on_delete=models.CASCADE) 
     creator = models.ForeignKey(AusomeUser) 
-    team_type = models.CharField(max_length=15, choices=[('R', 'Random'), ('U', 'User Generated'),]) 
+    team_type = models.CharField(max_length=15, choices=[('R', 'Random'), 
+        ('U', 'User generated'),
+        ]) 
     open_registration = models.BooleanField(default=False) 
+    team_password = models.CharField(max_length=50, null=True, blank=True)
+    player_max = models.IntegerField()
+    payment_plan = models.CharField(max_length=20, choices=[('team whole', 'team whole'),
+        ('team per person', 'team per person'),
+        ('individual', 'individual'),
+        ])
     date_added = models.DateTimeField(auto_now_add=True) 
 
     def natural_key(self):
