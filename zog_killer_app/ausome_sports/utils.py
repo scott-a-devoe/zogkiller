@@ -18,9 +18,9 @@ def verify_login_required(self, view_name, args=None):
     return response
 
 
-def create_ausome_user():
-    auth_user = User.objects.create_user(username='testuser',
-            email='test@test.com',
+def create_ausome_user(username, email):
+    auth_user = User.objects.create_user(username=username,
+            email=email,
             password='password99',
             )
     ausome_user = models.AusomeUser()
@@ -38,7 +38,7 @@ def create_ausome_user():
 
     return ausome_user
 
-def create_ausome_league():
+def create_ausome_league(status='open', team_max=10):
     league = models.League() 
     league.name = 'Beach Volleyball'
     league.sport = 'volleyball'
@@ -49,19 +49,19 @@ def create_ausome_league():
     league.end_date = dateparse.parse_date('2016-08-15') 
     league.description = 'Advanced beach volleyball played Wednesday nights at Zilker park'
     league.difficulty = 'advanced'
-    league.status = 'open'
-    league.team_max = 10
+    league.status = status 
+    league.team_max = team_max 
     league.save()
 
     return league
     
-def create_ausome_team(league=None, creator=None):
+def create_ausome_team(league=None, creator=None, player_max=10, team_type='R'):
     team = models.Team()
     team.name = 'Awaiting assignment'
     team.league = league
     team.creator = creator
     team.team_type = 'R'
-    team.player_max = 10 
+    team.player_max = player_max 
     team.open_registration = False
     team.save()
 

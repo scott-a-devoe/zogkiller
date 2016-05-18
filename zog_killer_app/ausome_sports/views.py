@@ -403,7 +403,7 @@ def post_create_team(request):
             other_team_slots = other_team_slots + ot.teammember_set.count()
         total_players = paid_team_slots + other_team_slots + random_players
         if total_players >= max_players:
-            data = {'msg': 'Sorry, but this league is full'}
+            data = {'msg': 'Sorry, but this league is at capacity'}
             invalid = HttpResponse(json.dumps(data), content_type='application/json')
             invalid.status_code = 400
             return invalid 
@@ -418,7 +418,7 @@ def post_create_team(request):
 
     # ensure password if team paying in full
     password = request.POST.get('team_password') 
-    if password == None:
+    if password == None and request.POST['payment_plan'] == 'team whole':
         data = {'msg': 'Please enter a password'}
         invalid = HttpResponse(json.dumps(data), content_type='application/json')
         invalid.status_code = 400

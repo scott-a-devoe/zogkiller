@@ -14,7 +14,7 @@ class UserProfileTest(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.ausome_user = utils.create_ausome_user()
+        cls.ausome_user = utils.create_ausome_user(username='testuser', email='test@test.com')
 
     def test_user_profile(self):
         response = utils.verify_login_required(self, 'user_profile')
@@ -108,7 +108,7 @@ class LeaguesBySportStatusTest(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.ausome_user = utils.create_ausome_user()
+        cls.ausome_user = utils.create_ausome_user(username='testuser', email='test@test.com')
         cls.league = utils.create_ausome_league() 
     
     def test_leagues_by_sport_status_success(self):
@@ -129,9 +129,9 @@ class JoinRandomTeamTest(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.ausome_user = utils.create_ausome_user()
+        cls.ausome_user = utils.create_ausome_user(username='testuser', email='test@test.com')
         cls.league = utils.create_ausome_league() 
-        cls.team = utils.create_ausome_team(leage=cls.league, creator=cls.ausome_user)
+        cls.team = utils.create_ausome_team(league=cls.league, creator=cls.ausome_user)
     
     def test_join_random_team_success(self):
         # verify that login is required
@@ -169,26 +169,33 @@ class CreateTeamTest(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.ausome_user = utils.create_ausome_user()
+        cls.ausome_user = utils.create_ausome_user(username='testuser', email='test@test.com')
+        cls.ausome_user_two = utils.create_ausome_user(username='testuser2', email='test2@test.com')
         cls.league = utils.create_ausome_league()
-        cls.team = utils.create_ausome_team(leage=cls.league, creator=cls.ausome_user)
+        cls.closed_league = utils.create_ausome_league(status='closed')
+        cls.no_team_league = utils.create_ausome_league(team_max=0)
+        cls.team = utils.create_ausome_team(league=cls.league, creator=cls.ausome_user)
+        cls.no_player_league = utils.create_ausome_league(team_max=1)
+        cls.no_player_team = utils.create_ausome_team(league=cls.no_player_league, creator=cls.ausome_user, player_max=0, team_type='U')
+        cls.no_player_random_team = utils.create_ausome_team(league=cls.no_player_league, creator=cls.ausome_user, player_max=0, team_type='R')
+
+    def test_verify_login_required(self):
+        # verify that login is required
+        response = self.client.post(reverse('create_team'))
+        self.assertEqual(response['Content-Type'], 'application/json')
+        self.assertEqual(response.status_code, 403) 
 
     def test_create_team_whole_success(self):
-        # verify that login is required
+        # log in
+        self.client.post(reverse('post_login'), 
+            {'username': 'testuser', 'password': 'password99'}
+            )
+
         data = {'league': str(self.league.pk), 
                 'team_name': 'Mighty ducks',
                 'team_password': 'password99',
                 'payment_plan': 'team whole',
                 }
-        response = self.client.post(reverse('create_team'), data)
-        self.assertEqual(response['Content-Type'], 'application/json')
-
-        self.assertEqual(response.status_code, 403) 
-
-        # log in
-        self.client.post(reverse('post_login'), 
-            {'username': 'testuser', 'password': 'password99'}
-            )
 
         response = self.client.post(reverse('create_team'), data)
         self.assertEqual(response['Content-Type'], 'application/json')
@@ -206,29 +213,195 @@ class CreateTeamTest(TestCase):
         self.assertEqual(team_member.user, self.ausome_user)
 
     def test_create_team_individual_success(self):
-        pass
+        # log in
+        self.client.post(reverse('post_login'), 
+            {'username': 'testuser2', 'password': 'password99'}
+            )
+
+        data = {'league': str(self.league.pk), 
+                'team_name': 'Mario Bros',
+                'payment_plan': 'team per person',
+                }
+
+        response = self.client.post(reverse('create_team'), data)
+        self.assertEqual(response['Content-Type'], 'application/json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['msg'], "You've successfully created a team!") 
+
+        team = models.Team.objects.get(league=self.league, name=data['team_name'].lower())
+        self.assertEqual(team.league.pk, int(data['league']))
+        self.assertEqual(team.name, data['team_name'].lower())
+        self.assertEqual(team.creator, self.ausome_user_two)
+        self.assertEqual(team.payment_plan, data['payment_plan'])
+
+        team_member = team.teammember_set.filter()[0]
+        self.assertEqual(team_member.user, self.ausome_user_two)
 
     def test_create_team_missing_post_data(self):
-        pass
+        # log in
+        self.client.post(reverse('post_login'), 
+            {'username': 'testuser2', 'password': 'password99'}
+            )
+
+        # missing league
+        data = {'team_name': 'Mario Bros',
+                'payment_plan': 'team per person',
+                }
+
+        response = self.client.post(reverse('create_team'), data)
+        self.assertEqual(response['Content-Type'], 'application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['msg'], "'league' is a required property") 
+
+        # missing team name
+        data = {'league': str(self.league.pk), 
+                'payment_plan': 'team per person',
+                }
+
+        response = self.client.post(reverse('create_team'), data)
+        self.assertEqual(response['Content-Type'], 'application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['msg'], "'team_name' is a required property") 
+
+        # missing payment plan
+        data = {'league': str(self.league.pk), 
+                'team_name': 'Mario Bros',
+                }
+
+        response = self.client.post(reverse('create_team'), data)
+        self.assertEqual(response['Content-Type'], 'application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['msg'], "'payment_plan' is a required property") 
 
     def test_create_team_league_does_not_exits(self):
-        pass
+        # log in
+        self.client.post(reverse('post_login'), 
+            {'username': 'testuser', 'password': 'password99'}
+            )
+
+        data = {'league': '30', 
+                'team_name': 'Mighty ducks',
+                'team_password': 'password99',
+                'payment_plan': 'team whole',
+                }
+
+        response = self.client.post(reverse('create_team'), data)
+        self.assertEqual(response['Content-Type'], 'application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['msg'], "No league found with that id") 
 
     def test_create_team_league_signup_closed(self):
-        pass
+        # log in
+        self.client.post(reverse('post_login'), 
+            {'username': 'testuser', 'password': 'password99'}
+            )
+
+        data = {'league': str(self.closed_league.pk), 
+                'team_name': 'Mighty ducks',
+                'team_password': 'password99',
+                'payment_plan': 'team whole',
+                }
+
+        response = self.client.post(reverse('create_team'), data)
+        self.assertEqual(response['Content-Type'], 'application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['msg'], "Sorry, this league is not open for registration.") 
 
     def test_create_team_user_already_in_a_team(self):
-        pass
+        # log in
+        self.client.post(reverse('post_login'), 
+            {'username': 'testuser', 'password': 'password99'}
+            )
+
+        data = {'league': str(self.league.pk), 
+                'team_name': 'Mighty ducks',
+                'team_password': 'password99',
+                'payment_plan': 'team whole',
+                }
+
+        response = self.client.post(reverse('create_team'), data)
+        self.assertEqual(response['Content-Type'], 'application/json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['msg'], "You've successfully created a team!") 
+
+        response = self.client.post(reverse('create_team'), data)
+        self.assertEqual(response['Content-Type'], 'application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['msg'], "You're already on a team in this league! Sorry, but you can only join one team per league.") 
 
     def test_create_team_above_team_max(self):
-        pass
+        # log in
+        self.client.post(reverse('post_login'), 
+            {'username': 'testuser', 'password': 'password99'}
+            )
+
+        data = {'league': str(self.no_team_league.pk), 
+                'team_name': 'Mighty ducks',
+                'team_password': 'password99',
+                'payment_plan': 'team whole',
+                }
+
+        response = self.client.post(reverse('create_team'), data)
+        self.assertEqual(response['Content-Type'], 'application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['msg'], "Sorry, but this league is full") 
 
     def test_create_team_above_player_max(self):
-        pass
+        # log in
+        self.client.post(reverse('post_login'), 
+            {'username': 'testuser', 'password': 'password99'}
+            )
+
+        data = {'league': str(self.no_player_league.pk), 
+                'team_name': 'Mighty ducks',
+                'team_password': 'password99',
+                'payment_plan': 'team per person',
+                }
+
+        response = self.client.post(reverse('create_team'), data)
+        self.assertEqual(response['Content-Type'], 'application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['msg'], "Sorry, but this league is at capacity") 
 
     def test_create_team_name_already_exists(self):
-        pass
+        # log in
+        self.client.post(reverse('post_login'), 
+            {'username': 'testuser', 'password': 'password99'}
+            )
+
+        data = {'league': str(self.league.pk), 
+                'team_name': 'Mighty ducks',
+                'team_password': 'password99',
+                'payment_plan': 'team whole',
+                }
+
+        response = self.client.post(reverse('create_team'), data)
+        self.assertEqual(response['Content-Type'], 'application/json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['msg'], "You've successfully created a team!") 
+
+        # log in with a different user
+        self.client.post(reverse('post_login'), 
+            {'username': 'testuser2', 'password': 'password99'}
+            )
+
+        response = self.client.post(reverse('create_team'), data)
+        self.assertEqual(response['Content-Type'], 'application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['msg'], "Sorry, but this team name is taken") 
 
     def test_create_team_no_password(self):
-        pass
+        # log in
+        self.client.post(reverse('post_login'), 
+            {'username': 'testuser', 'password': 'password99'}
+            )
 
+        data = {'league': str(self.league.pk), 
+                'team_name': 'Mighty ducks',
+                'payment_plan': 'team whole',
+                }
+
+        response = self.client.post(reverse('create_team'), data)
+        self.assertEqual(response['Content-Type'], 'application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['msg'], "Please enter a password") 
