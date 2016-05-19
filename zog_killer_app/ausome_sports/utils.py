@@ -55,13 +55,14 @@ def create_ausome_league(status='open', team_max=10):
 
     return league
     
-def create_ausome_team(league=None, creator=None, player_max=10, team_type='R'):
+def create_ausome_team(league=None, creator=None, player_max=10, team_type='R', payment_plan='individual'):
     team = models.Team()
     team.name = 'Awaiting assignment'
     team.league = league
     team.creator = creator
-    team.team_type = 'R'
+    team.team_type = team_type 
     team.player_max = player_max 
+    team.payment_plan = payment_plan 
     team.open_registration = False
     team.save()
 

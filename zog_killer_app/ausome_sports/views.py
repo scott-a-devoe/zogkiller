@@ -260,7 +260,7 @@ def post_join_team(request):
         invalid.status_code = 400
         return invalid 
 
-    # check if team exists in league and team not full if not random sign up 
+    # check if team exists in league and team not full if not random or open call then sign up 
     if request.POST['team'] != 'random':
         team_id = int(request.POST['team'])
         try:
@@ -271,13 +271,14 @@ def post_join_team(request):
             invalid.status_code = 400
             return invalid 
 
-        # check if team is full 
-        team_member_count = models.TeamMember.objects.filter(team=team).count()
-        if team_member_count >= team.player_max:
-            data = {'msg': 'Sorry, but this team is full!'}
-            invalid = HttpResponse(json.dumps(data), content_type='application/json')
-            invalid.status_code = 400
-            return invalid 
+        # check if team is full only for teams who paid in full. Team per person doesn't get this. 
+        if team.payment_plan == 'team whole':
+            team_member_count = models.TeamMember.objects.filter(team=team).count()
+            if team_member_count >= team.player_max:
+                data = {'msg': 'Sorry, but this team is full!'}
+                invalid = HttpResponse(json.dumps(data), content_type='application/json')
+                invalid.status_code = 400
+                return invalid 
     else:
         # get random team object
         try:
@@ -300,13 +301,13 @@ def post_join_team(request):
             other_team_slots = other_team_slots + ot.teammember_set.count()
         total_players = paid_team_slots + other_team_slots + random_players
         if total_players >= max_players:
-            data = {'msg': 'Sorry, but this team is full!'}
+            data = {'msg': 'Sorry, but this league is full!'}
             invalid = HttpResponse(json.dumps(data), content_type='application/json')
             invalid.status_code = 400
             return invalid 
 
     # add user to random team or open_call team
-    if team.team_type == 'R' or team.open_registration == True:
+    if team.team_type == 'R' or team.payment_plan == "team per person":
         new_team_member = models.TeamMember(user=ausome_user, team=team)
     else:
         # add user to password protected team
