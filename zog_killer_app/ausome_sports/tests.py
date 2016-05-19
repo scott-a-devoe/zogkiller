@@ -608,3 +608,62 @@ class CreateTeamTest(TestCase):
         self.assertEqual(response['Content-Type'], 'application/json')
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()['msg'], "Please enter a password") 
+
+class UserTeamsTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.ausome_user = utils.create_ausome_user(username='testuser', email='test@test.com')
+        cls.ausome_user_two = utils.create_ausome_user(username='testuser2', email='test2@test.com')
+        cls.league = utils.create_ausome_league() 
+        cls.team = utils.create_ausome_team(league=cls.league, creator=cls.ausome_user, team_type = 'U') 
+        cls.team_member = models.TeamMember(team=cls.team, user=cls.ausome_user)
+        cls.team_member.save()
+
+    def test_verify_login_required(self):
+        # verify that login is required
+        response = self.client.post(reverse('user_teams'))
+        self.assertEqual(response['Content-Type'], 'application/json')
+        self.assertEqual(response.status_code, 403) 
+    
+    def test_get_teams_success(self):
+        # log in
+        self.client.post(reverse('post_login'), 
+                {'username': 'testuser', 'password': 'password99'}
+                )
+
+        user_team_members = self.ausome_user.teammember_set.all()
+        user_teams = [tm.team for tm in user_team_members] 
+        user_leagues = [t.league for t in user_teams]
+
+        user_teams = serializers.serialize('json', user_teams) 
+        user_leagues = serializers.serialize('json', user_leagues) 
+        data = {'leagues': user_leagues,
+                'teams': user_teams,
+                }
+
+        response = self.client.get(reverse('user_teams'))
+        self.assertEqual(response['Content-Type'], 'application/json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), data) 
+
+    def test_get_teams_empty(self):
+        # log in
+        self.client.post(reverse('post_login'), 
+                {'username': 'testuser2', 'password': 'password99'}
+                )
+
+        user_team_members = self.ausome_user_two.teammember_set.all()
+        user_teams = [tm.team for tm in user_team_members] 
+        user_leagues = [t.league for t in user_teams]
+
+        user_teams = serializers.serialize('json', user_teams) 
+        user_leagues = serializers.serialize('json', user_leagues) 
+        data = {'leagues': user_leagues,
+                'teams': user_teams,
+                }
+        
+        response = self.client.get(reverse('user_teams'))
+        self.assertEqual(response['Content-Type'], 'application/json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), data) 

@@ -26,6 +26,26 @@ def get_user_profile(request):
 
     return HttpResponse(data, content_type='application/json')
 
+@decorators.login_required
+def get_user_teams(request):
+    """
+    Return all teams a user is on and the associated league.
+    """
+
+    ausome_user = models.AusomeUser.objects.get(user=request.user)
+    user_team_members = ausome_user.teammember_set.all()
+    user_teams = [tm.team for tm in user_team_members] 
+    user_leagues = [t.league for t in user_teams]
+
+    user_teams = serializers.serialize('json', user_teams) 
+    user_leagues = serializers.serialize('json', user_leagues) 
+    data = {'leagues': user_leagues,
+            'teams': user_teams,
+            }
+    data = json.dumps(data) 
+
+    return HttpResponse(data, content_type='application/json')
+
 @require_POST
 def post_login(request):
     username = request.POST['username']
