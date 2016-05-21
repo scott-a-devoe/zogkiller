@@ -3,7 +3,6 @@
 angular.module('zogkillerApp')
 
     .controller('HomeController', ['$scope', 'homeFactory', function($scope, homeFactory) {
-
         var dir = '/static/app/'
         $scope.topBanner = dir + 'images/scottwolf.jpg';
         $scope.loadingImg = dir + 'images/loading.gif';
@@ -11,8 +10,21 @@ angular.module('zogkillerApp')
 
     }])
 
-    .controller('LeagueController', ['$scope', function($scope) {
-        
+
+
+    .controller('LeagueController', ['$scope', 'leagueFactory', function($scope, leagueFactory) {
+        var dir = '/static/app/'
+        $scope.loadingImg = dir + 'images/loading.gif';
+        $scope.isLoading = true;
+
+        leagueFactory.getLeagues().then(function(response){
+            $scope.leagues = leagueFactory.formatResponse(response);
+            $scope.isLoading = false;
+        })
+
+
+
+
     }])
 
 

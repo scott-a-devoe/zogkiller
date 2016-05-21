@@ -1,34 +1,37 @@
 <div ng-controller="LeagueController">
-    <div class="container">
-        <div class="fakeHeader" style="height:100px"></div>
+    <div class="container" style="margin-top:100px;">
         <div>
-            <div class="col-lg-1">s</div>
-            <div class="col-lg-10 ccenter">
-                <crisp>
+            <div class="col-lg-12 ccenter">
+                <div class="loading" ng-if="isLoading">
+                    <img src="{{loadingImg}}" class="img-md">
+                </div>
+                <crisp ng-if="!isLoading">
                     <table>
                         <thead>
                             <tr>
-                                <th>League</th><th>Level of Play</th><th>Day of Week</th><th>Gym Locations</th><th>Indoor/Outdoor</th><th>Start Date</th><th>Registration Deadline</th>
+                                <th>League</th>
+                                <th>Level of Play</th>
+                                <th>Day of Week</th>
+                                <th>Gym Locations</th>
+                                <th>Indoor/Outdoor</th>
+                                <th>Start Date</th>
+                                <th>Registration Deadline</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>Flame Ball</td><td>Blazin'</td><td>Tuesday</td><td>xxxx</td><td>Indoor</td><td>July 06, 2017</td><td>Jun 16, 2017</td>
-                            </tr>
-                            <tr>
-                                <td>Luminosity</td><td>Blazin'</td><td>Monday</td><td>xxxx</td><td>Indoor</td><td>July 16, 2017</td><td>Jun 16, 2017</td>
-                            </tr>
-                            <tr>
-                                <td>Sunny Delight</td><td>Chillin'</td><td>Sunday</td><td>xxxx</td><td>Outdoor Beach</td><td>July 21, 2017</td><td>Jun 16, 2017</td>
-                            </tr>
-                            <tr>
-                                <td>Luigi Time</td><td>Chumps</td><td>Wednesday</td><td>xxxx</td><td>Indoor</td><td>Aug 01, 2017</td><td>Jun 16, 2017</td>
+                            <tr ng-repeat="league in leagues">
+                                <td>{{league.name}}</td>
+                                <td>{{league.difficulty}}</td>
+                                <td>{{league.day}}</td>
+                                <td>{{league.gyms}}</td>
+                                <td>{{league.indoor}}</td>
+                                <td>{{league.start_date | date}}</td>
+                                <td>{{league.deadline}}</td>
                             </tr>
                         </tbody>
                     </table>
                 </crisp>
             </div>
-            <div class="col-lg-1">s</div>
         </div>
 
     </div>
