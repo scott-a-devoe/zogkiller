@@ -7,6 +7,7 @@ angular.module('zogkillerApp')
         var dir = '/static/app/'
         $scope.topBanner = dir + 'images/scottwolf.jpg';
         $scope.loadingImg = dir + 'images/loading.gif';
+        $scope.volleyballImg = dir + 'images/vector-volleyball.jpg';
 
     }])
 
