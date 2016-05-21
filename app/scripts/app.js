@@ -8,7 +8,7 @@ angular.module('zogkillerApp', ['ui.router', 'ngResource'])
         $stateProvider
             // route for the home page
             .state('app', {
-                url:'',
+                url:'/',
                 views: {
                     // 'header': {
                     //     templateUrl : 'views/header/.html',
@@ -26,7 +26,7 @@ angular.module('zogkillerApp', ['ui.router', 'ngResource'])
             })
 
             .state('app.leagues', {
-                url:'/leagues',
+                url:'leagues',
                 views: {
                     'content@': {
                         templateUrl : '/static/app/views/leagues.html',
