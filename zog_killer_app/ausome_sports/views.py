@@ -482,3 +482,42 @@ def post_create_team(request):
 
     data = {'msg': "You've successfully created a team!"}
     return HttpResponse(json.dumps(data), content_type='application/json')
+
+@decorators.login_required
+def get_team_games(request, league_id, team_id):
+    """
+    Returns all games for a particular team if the user is on that team
+    """
+
+    # ensure league exists
+    try:
+        league = models.League.objects.get(pk=league_id)
+    except models.League.DoesNotExist:
+        data = {'msg': 'No league found with that id'}
+        invalid = HttpResponse(json.dumps(data), content_type='application/json')
+        invalid.status_code = 400
+        return invalid 
+
+    # ensure team exists in league
+    try:
+        team = models.Team.objects.get(league=league, pk=team_id)
+    except models.Team.DoesNotExist:
+        data = {'msg': 'No team found with that id'}
+        invalid = HttpResponse(json.dumps(data), content_type='application/json')
+        invalid.status_code = 400
+        return invalid 
+
+    # ensure user is on team
+    ausome_user = models.AusomeUser.objects.get(user=request.user)
+    try:
+        team_member = ausome_user.teammember_set.get(team=team)
+    except models.TeamMember.DoesNotExist:
+        data = {'msg': "You're not allowed to access this team's games"}
+        invalid = HttpResponse(json.dumps(data), content_type='application/json')
+        invalid.status_code = 403
+        return invalid 
+
+    games = models.Game.objects.filter(teams=team) 
+    data = serializers.serialize('json', games)
+
+    return HttpResponse(json.dumps(data), content_type='application/json')

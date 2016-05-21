@@ -7,7 +7,7 @@ from . import models
 
 def verify_login_required(self, view_name, args=None):
     response = self.client.get(reverse(view_name, args=args))
-    self.assertEqual(response.status_code, 403)
+    self.assertEqual(response.status_code, 401)
 
     self.client.post(reverse('post_login'), 
             {'username': 'testuser', 'password': 'password99'}
@@ -68,3 +68,11 @@ def create_ausome_team(league=None, creator=None, player_max=10, team_type='R', 
 
     return team
     
+def create_ausome_game(league=None):
+    game = models.Game()
+    game.league = league
+    game.date = dateparse.parse_datetime('2016-08-05 19:00:00') 
+    game.location = 'Zilker Park'
+    game.save()
+
+    return game

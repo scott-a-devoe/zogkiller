@@ -15,7 +15,7 @@ def test_login_required(view_name):
         @wraps(test_func, assigned=available_attrs(test_func))
         def test_login_required_decorator(self, *args, **kwargs):
             response = self.client.get(reverse(view_name))
-            self.assertEqual(response.status_code, 403)
+            self.assertEqual(response.status_code, 401)
             test_func(self, *args, **kwargs)
         return test_login_required_decorator 
     return decorator
@@ -34,7 +34,7 @@ def user_passes_test(test_func, login_url=None, redirect_field_name=REDIRECT_FIE
             if test_func(request.user):
                 return view_func(request, *args, **kwargs)
             denied = JsonResponse({'msg': 'Permission Denied'}) 
-            denied.status_code = 403
+            denied.status_code = 401
             return denied 
         return _wrapped_view
     return decorator

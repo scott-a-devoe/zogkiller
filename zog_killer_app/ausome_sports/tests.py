@@ -155,7 +155,7 @@ class JoinTeamTest(TestCase):
         # verify that login is required
         response = self.client.post(reverse('create_team'))
         self.assertEqual(response['Content-Type'], 'application/json')
-        self.assertEqual(response.status_code, 403) 
+        self.assertEqual(response.status_code, 401) 
     
     def test_join_random_team_success(self):
         # log in
@@ -386,7 +386,7 @@ class CreateTeamTest(TestCase):
         # verify that login is required
         response = self.client.post(reverse('create_team'))
         self.assertEqual(response['Content-Type'], 'application/json')
-        self.assertEqual(response.status_code, 403) 
+        self.assertEqual(response.status_code, 401) 
 
     def test_create_team_whole_success(self):
         # log in
@@ -624,7 +624,7 @@ class UserTeamsTest(TestCase):
         # verify that login is required
         response = self.client.post(reverse('user_teams'))
         self.assertEqual(response['Content-Type'], 'application/json')
-        self.assertEqual(response.status_code, 403) 
+        self.assertEqual(response.status_code, 401) 
     
     def test_get_teams_success(self):
         # log in
@@ -667,3 +667,71 @@ class UserTeamsTest(TestCase):
         self.assertEqual(response['Content-Type'], 'application/json')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), data) 
+
+class UserTeamGamesTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.ausome_user = utils.create_ausome_user(username='testuser', email='test@test.com')
+        cls.ausome_user_two = utils.create_ausome_user(username='testuser2', email='test2@test.com')
+        cls.league = utils.create_ausome_league() 
+        cls.team = utils.create_ausome_team(league=cls.league, creator=cls.ausome_user, team_type = 'U') 
+        cls.team_member = models.TeamMember(team=cls.team, user=cls.ausome_user)
+        cls.team_member.save()
+        cls.game = utils.create_ausome_game(league=cls.league) 
+        cls.game.teams.add(cls.team)
+
+        cls.empty_team = utils.create_ausome_team(league=cls.league, creator=cls.ausome_user, team_type = 'U') 
+
+    def test_verify_login_required(self):
+        # verify that login is required
+        response = self.client.post(reverse('user_teams'))
+        self.assertEqual(response['Content-Type'], 'application/json')
+        self.assertEqual(response.status_code, 401) 
+    
+    def test_get_team_games(self):
+        # log in
+        self.client.post(reverse('post_login'), 
+                {'username': 'testuser', 'password': 'password99'}
+                )
+
+        data = self.team.game_set.all() 
+        data = serializers.serialize('json', data)
+
+        response = self.client.get(reverse('team_games', args=[str(self.league.pk), str(self.team.pk)]))
+        self.assertEqual(response['Content-Type'], 'application/json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), data)
+
+    def test_no_league(self):
+        # log in
+        self.client.post(reverse('post_login'), 
+                {'username': 'testuser', 'password': 'password99'}
+                )
+
+        response = self.client.get(reverse('team_games', args=["55", str(self.team.pk)]))
+        self.assertEqual(response['Content-Type'], 'application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['msg'], 'No league found with that id')
+
+    def test_no_team(self):
+        # log in
+        self.client.post(reverse('post_login'), 
+                {'username': 'testuser', 'password': 'password99'}
+                )
+
+        response = self.client.get(reverse('team_games', args=[str(self.league.pk), "55"]))
+        self.assertEqual(response['Content-Type'], 'application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()['msg'], 'No team found with that id')
+
+    def test_user_not_on_team(self):
+        # log in
+        self.client.post(reverse('post_login'), 
+                {'username': 'testuser', 'password': 'password99'}
+                )
+
+        response = self.client.get(reverse('team_games', args=[str(self.league.pk), str(self.empty_team.pk)]))
+        self.assertEqual(response['Content-Type'], 'application/json')
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()['msg'], "You're not allowed to access this team's games")
