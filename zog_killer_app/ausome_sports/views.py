@@ -4,7 +4,7 @@ from jsonschema import validate
 from jsonschema.exceptions import ValidationError as JsonValidationError
 from . import models, decorators, schema
 
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User 
 from django.contrib.auth.password_validation import validate_password
 from django.core import serializers
@@ -66,6 +66,12 @@ def post_login(request):
         denied = HttpResponse(json.dumps(data), content_type='application/json')
         denied.status_code = 401
         return denied 
+
+def get_logout(request):
+    logout(request)
+    
+    data = {'msg': 'Success'}
+    return HttpResponse(json.dumps(data), content_type='application/json')
 
 @require_POST
 def post_create_user(request):

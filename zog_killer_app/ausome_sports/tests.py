@@ -10,6 +10,31 @@ from . import models, decorators, utils
 
 
 # Create your tests here.
+class LogInLogOutTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.ausome_user = utils.create_ausome_user(username='testuser', email='test@test.com')
+
+    def test_login_logout(self):
+        response = self.client.get(reverse('user_profile')) 
+        self.assertEqual(response['Content-Type'], 'application/json')
+        self.assertEqual(response.status_code, 401)
+
+        self.client.post(reverse('post_login'), 
+            {'username': 'testuser', 'password': 'password99'}
+            )
+
+        response = self.client.get(reverse('user_profile')) 
+        self.assertEqual(response['Content-Type'], 'application/json')
+        self.assertEqual(response.status_code, 200)
+
+        self.client.get(reverse('logout'))
+        
+        response = self.client.get(reverse('user_profile')) 
+        self.assertEqual(response['Content-Type'], 'application/json')
+        self.assertEqual(response.status_code, 401)
+
 class UserProfileTest(TestCase):
 
     @classmethod
@@ -19,6 +44,7 @@ class UserProfileTest(TestCase):
     def test_user_profile(self):
         response = utils.verify_login_required(self, 'user_profile')
         self.assertEqual(response['Content-Type'], 'application/json')
+        self.assertEqual(response.status_code, 200)
 
 class AccountCreationTest(TestCase):
 
