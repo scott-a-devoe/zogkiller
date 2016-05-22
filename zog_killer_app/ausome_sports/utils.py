@@ -47,6 +47,12 @@ def create_ausome_league(status='open', team_max=10):
     league.country = 'US'
     league.start_date = dateparse.parse_date('2016-06-15') 
     league.end_date = dateparse.parse_date('2016-08-15') 
+    league.reg_date = dateparse.parse_date('2016-06-01') 
+    league.team_price = '$1000'
+    league.individual_price = '$120'
+    league.day_of_week = "Monday/Tuesday"
+    league.location = 'Zilker Park'
+    league.indoor_outdoor = 'Beach'
     league.description = 'Advanced beach volleyball played Wednesday nights at Zilker park'
     league.difficulty = 'advanced'
     league.status = status 

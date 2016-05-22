@@ -31,10 +31,16 @@ class League(models.Model):
     country = models.CharField(max_length=2) 
     start_date = models.DateField() 
     end_date = models.DateField() 
+    reg_date = models.DateField()
+    day_of_week = models.CharField(max_length=100)
+    indoor_outdoor = models.CharField(max_length=20)
     description = models.TextField() 
+    location = models.TextField() 
     difficulty = models.CharField(max_length=20) 
     status = models.CharField(max_length=20) 
     team_max = models.IntegerField() 
+    team_price = models.CharField(max_length=10)
+    individual_price = models.CharField(max_length=10)
     date_added = models.DateTimeField(auto_now_add=True) 
     
     def natural_key(self):
