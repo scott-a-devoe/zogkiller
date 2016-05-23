@@ -238,7 +238,6 @@ def post_update_profile(request):
     data = {'msg': 'Profile updated!'}
     return HttpResponse(json.dumps(data), content_type='application/json')
 
-@decorators.login_required
 def get_leagues_by_sport_status(request, sport, status):
     league_set = models.League.objects.filter(sport=sport, status=status)
     data = serializers.serialize('json', league_set)
