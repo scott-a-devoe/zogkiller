@@ -1,11 +1,8 @@
 <div ng-controller="LeagueController">
     <div class="container" style="margin-top:100px;">
         <div>
-            <div class="col-lg-12 ccenter">
-                <div class="loading" ng-if="isLoading">
-                    <img src="{{loadingImg}}" class="img-md">
-                </div>
-                <crisp ng-if="!isLoading">
+            <div class="col-lg-12">
+                <crisp>
                     <table>
                         <thead>
                             <tr>
@@ -18,19 +15,22 @@
                                 <th>Registration Deadline</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody ng-if="!isLoading">
                             <tr ng-repeat="league in leagues">
                                 <td>{{league.name}}</td>
                                 <td>{{league.difficulty}}</td>
-                                <td>{{league.day}}</td>
-                                <td>{{league.gyms}}</td>
-                                <td>{{league.indoor}}</td>
+                                <td>{{league.day_of_week}}</td>
+                                <td>{{league.location}}</td>
+                                <td>{{league.indoor_outdoor}}</td>
                                 <td>{{league.start_date | date}}</td>
-                                <td>{{league.deadline}}</td>
+                                <td>{{league.reg_date | date}}</td>
                             </tr>
                         </tbody>
                     </table>
                 </crisp>
+                <div class="loading ccenter" ng-if="isLoading">
+                    <img src="{{loadingImg}}" class="img-md">
+                </div>
             </div>
         </div>
 
