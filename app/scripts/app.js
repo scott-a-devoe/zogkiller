@@ -3,6 +3,8 @@
 angular.module('zogkillerApp', ['ui.router', 'ngResource'])
     .config(['$stateProvider', '$urlRouterProvider', '$locationProvider', function($stateProvider, $urlRouterProvider, $locationProvider) {
 
+        var dir = '/static/app/';
+
         $locationProvider.html5Mode(true);
 
         $stateProvider
@@ -10,12 +12,13 @@ angular.module('zogkillerApp', ['ui.router', 'ngResource'])
             .state('app', {
                 url:'/',
                 views: {
-                    // 'header': {
-                    //     templateUrl : 'views/header/.html',
-                    // }
-                    // ,
+                    'header': {
+                        templateUrl : dir + 'views/header.html',
+                        controller : 'HeaderController'
+                    }
+                    ,
                     'content': {
-                        templateUrl : '/static/app/views/home.html',
+                        templateUrl : dir + 'views/home.html',
                         controller  : 'HomeController'
                     }
                     // ,
@@ -29,7 +32,7 @@ angular.module('zogkillerApp', ['ui.router', 'ngResource'])
                 url:'leagues',
                 views: {
                     'content@': {
-                        templateUrl : '/static/app/views/leagues.html',
+                        templateUrl : dir + 'views/leagues.html',
                         controller  : 'LeagueController'
                     }
                 }

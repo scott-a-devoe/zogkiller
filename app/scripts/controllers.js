@@ -2,6 +2,15 @@
 
 angular.module('zogkillerApp')
 
+    .controller('HeaderController', ['$scope', function($scope) {
+        var dir = '/static/app/';
+        $scope.isActive = function(path) {
+            var regex = new RegExp(path + '$');
+            return (regex.test(location.pathname)) ? 'active' : '';
+        }
+    }])
+
+
     .controller('HomeController', ['$scope', 'homeFactory', function($scope, homeFactory) {
         var dir = '/static/app/'
         $scope.topBanner = dir + 'images/scottwolf.jpg';
