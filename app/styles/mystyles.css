@@ -2,6 +2,21 @@
   /*outline: 1px solid green;*/
 }
 
+ul.nav {
+  padding: 55px 0;
+  float:right;
+}
+
+ul.nav > li {
+  float:left;
+  padding: 0 5px;
+}
+
+ul.nav .active {
+  background-color: #eee;
+}
+
+
 .overlay {
 	width:1280px;
 	height:593px;
@@ -37,7 +52,9 @@
   width:400px;
 }
 
-
+.inline {
+  display:inline-block;
+}
 
 
 
