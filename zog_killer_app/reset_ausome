@@ -1,0 +1,23 @@
+#!/bin/bash
+
+if [ -d ../env ]; then
+    source ../env/bin/activate
+fi
+
+echo "Destroying database ausome_sports..."
+dropdb ausome_sports
+
+echo "Creating database ausome_sports..."
+createdb ausome_sports
+
+echo "Removing previous migration script..."
+rm ausome_sports/migrations/0001_initial.py
+
+echo "Creating initial migration script..."
+python manage.py makemigrations
+
+echo "Running migration script..."
+python manage.py migrate
+
+echo "Creating super user account..."
+python manage.py createsuperuser
