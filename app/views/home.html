@@ -1,27 +1,54 @@
 <div ng-controller="HomeController">
 
-    <div class="container-fluid" style="padding:0">
-        <div class="hasOverlay center-block" style="width:1280px">
-            <img src="{{topBanner}}">
-            <div class="overlay"></div>
+    <div class="container-fluid">
+        <div class="center-block hasOverlay" style="max-width:1200px;">
+            <img src="{{topBanner}}" style="width:100%; -webkit-filter: brightness(35%);">
             <div class="overlayContent">
-
-                <div id="homeButtons" class="center-block">
-                    <a ui-sref="app.leagues" class="btn btn-primary btn-lg">
-                        <img src="{{volleyballImg}}" style="width:50px;">
-                    </a>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div id="sports-nav">
+                            <div class="sport-btn">
+                                <a ui-sref="app.leagues" class="btn btn-primary btn-sm">
+                                    <img src="{{volleyballImg}}" style="width:25px;">
+                                    <span>&nbsp;&nbsp;&nbsp;Volleyball</span>
+                                </a>
+                            </div>
+                            <div class="sport-btn">
+                                <a ui-sref="app.leagues" class="btn btn-primary btn-sm">
+                                    <img src="{{volleyballImg}}" style="width:25px;">
+                                    <span>&nbsp;&nbsp;&nbsp;Volleyball</span>
+                                </a>
+                            </div>
+                            <div class="sport-btn">
+                                <a ui-sref="app.leagues" class="btn btn-primary btn-sm">
+                                    <img src="{{volleyballImg}}" style="width:25px;">
+                                    <span>&nbsp;&nbsp;&nbsp;Volleyball</span>
+                                </a>
+                            </div>
+                            <div class="sport-btn">
+                                <a ui-sref="app.leagues" class="btn btn-primary btn-sm">
+                                    <img src="{{volleyballImg}}" style="width:25px;">
+                                    <span>&nbsp;&nbsp;&nbsp;Volleyball</span>
+                                </a>
+                            </div>
+                            <div class="sport-btn">
+                                <a ui-sref="app.leagues" class="btn btn-primary btn-sm">
+                                    <img src="{{volleyballImg}}" style="width:25px;">
+                                    <span>&nbsp;&nbsp;&nbsp;Volleyball</span>
+                                </a>
+                            </div>
+                            <div class="sport-btn">
+                                <a ui-sref="app.leagues" class="btn btn-primary btn-sm">
+                                    <img src="{{volleyballImg}}" style="width:25px;">
+                                    <span>&nbsp;&nbsp;&nbsp;Volleyball</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9"></div>
                 </div>
-
             </div>
         </div>
     </div>
 
-
-    <div class="row row-centered">
-        <div class="col-lg-2"></div>
-        <div class="col-lg-8">
-            <img src="{{loadingImg}}" class="center-block">
-        </div>
-        <div class="col-lg-2"></div>
-    </div>
 </div>

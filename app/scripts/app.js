@@ -38,16 +38,16 @@ angular.module('zogkillerApp', ['ui.router', 'ngResource'])
                 }
             })
         
-            // // route for the aboutus page
-            // .state('app.aboutus', {
-            //     url:'aboutus',
-            //     views: {
-            //         'content@': {
-            //             templateUrl : 'views/aboutus.html',
-            //             controller  : 'AboutController'                  
-            //         }
-            //     }
-            // })
+            // route for the aboutus page
+            .state('app.aboutus', {
+                url:'aboutus',
+                views: {
+                    'content@': {
+                        templateUrl : dir + 'views/aboutus.html'
+                        //controller  : 'AboutController'
+                    }
+                }
+            })
         
             // // route for the contactus page
             // .state('app.contactus', {
