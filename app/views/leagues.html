@@ -16,7 +16,7 @@
                             </tr>
                         </thead>
                         <tbody ng-if="!isLoading">
-                            <tr ng-repeat="league in leagues">
+                            <tr ng-repeat="league in leagues" class="league-row" ng-click="expandLeague()">
                                 <td>{{league.name}}</td>
                                 <td>{{league.difficulty}}</td>
                                 <td>{{league.day_of_week}}</td>

@@ -31,7 +31,9 @@ angular.module('zogkillerApp')
             $scope.isLoading = false;
         })
 
-
+        $scope.expandLeague = function() {
+            debugger;
+        }
 
 
     }])
